@@ -51,6 +51,7 @@ pub fn generate_noise_map(props: NoiseMapParams) -> Vec<Vec<f64>> {
 
                 let perlin_value = perlin.get([sx, sy]);
                 noise_height += perlin_value * amplitude;
+
                 amplitude *= persistance;
                 frequency *= lacunarity;
             }
