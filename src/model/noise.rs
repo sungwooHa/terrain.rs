@@ -1,40 +1,39 @@
+use super::octave::Octave;
 
-pub struct Noise{
-    octaves : Vec<Octave>,
-    seed : u32,
+pub struct Noise {
+    pub octaves: Vec<Octave>,
+    pub seed: u32,
 }
 
 impl Noise {
-    pub fn make_noise(octaves : Vec<Octave>, seed : u32) -> Optional<Noise> {
-
-        if octaves.is_empty()
-            return {};
-
-        Noise {
-            octaves : octaves,
-            seed : seed
+    pub fn make_noise(octaves: Vec<Octave>, seed: u32) -> Option<Noise> {
+        if octaves.is_empty() {
+            None
+        } else {
+            Some(Noise {
+                octaves: octaves,
+                seed: seed,
+            })
         }
     }
 
-    pub fn generate_noise_map(&self, map_width : usize, map_height : usize, scale : f64, ) -> Vec<Vec<f64>> {
+    //이름 중복을 검사해야할까?
+    pub fn add_octave(&mut self, octave: Octave) {
+        self.octaves.push(octave)
+    }
 
-        let perlin = OpenSimplex::new();
-        perlin.set_seed(seed);
+    pub fn append_octave(&mut self, mut octaves: Vec<Octave>) {
+        self.octaves.append(&mut octaves)
+    }
 
-        let mut noise_map = (0..width)
-            .map(|_| (0..height).map(|_| 0f64).collect())
-            .collect();        
-
-        for y in 0..map_height {
-            for x in 0..map_width {
-                sampleX = x / scale;
-                sampleY = y / scale;
+    pub fn remove_octave(&mut self, type_name: String) -> bool {
+        for octave_idx in 0..self.octaves.len() {
+            if self.octaves[octave_idx].type_name == type_name {
+                self.octaves.remove(octave_idx);
+                return true;
             }
         }
-    }
 
-    fn adjust_scale(scale : &f64) -> f64{
-        let scale = scale < 0 ? 0 : 
-
+        false
     }
 }

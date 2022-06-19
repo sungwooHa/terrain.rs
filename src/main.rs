@@ -1,5 +1,4 @@
 use csv;
-mod generator;
 
 const WIDTH: usize = 100;
 const HEIGHT: usize = 100;
@@ -10,6 +9,17 @@ const LACUNARITY: f64 = 2f64;
 const SEED: u32 = 2400;
 
 fn main() {
+    
+    let octave_1 = Octave::make_octave();
+    let octave_2 = Octave::make_octave();
+    
+    let octaves : Vec<Octave>
+
+    let noise = Noise::make_noise(,)
+    let terrain = Terrain::make_terrain
+
+
+
     let noise_map = generator::generate_noise_map(generator::NoiseMapParams {
         width: WIDTH,
         height: HEIGHT,
