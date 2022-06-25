@@ -1,7 +1,11 @@
-use super::noise::Noise;
+use super::{
+    noise::Noise,
+    validatable::{self, Validatable},
+};
 use noise::{NoiseFn, OpenSimplex, Seedable};
 use rand::{prelude::StdRng, Rng, SeedableRng};
 
+#[derive(Clone)]
 pub struct Terrain {
     noise: Noise,
     pub width: usize,
@@ -9,17 +13,27 @@ pub struct Terrain {
     pub scale: f64,
 }
 
+impl Validatable for Terrain {
+    fn adjust(&mut self) -> Terrain {
+        self.width = if self.width < 1 { 1 } else { self.width };
+        self.height = if self.height < 1 { 1 } else { self.height };
+
+        self.clone()
+    }
+}
+
 impl Terrain {
     pub fn make_terrain(noise: Noise, width: usize, height: usize, scale: f64) -> Terrain {
         Terrain {
-            noise: noise,
-            width: width,
-            height: height,
-            scale: scale,
+            noise,
+            width,
+            height,
+            scale,
         }
+        .adjust()
     }
 
-    pub fn generate_noise_map(&self) -> Vec<Vec<f64>> {
+    pub fn generate_noise_map(&self) -> Option<Vec<Vec<f64>>> {
         let perlin = OpenSimplex::new();
         perlin.set_seed(self.noise.seed as u32);
 
@@ -57,7 +71,8 @@ impl Terrain {
                 noise_map[x][y] = noise_height;
             }
         }
-        noise_map
+
+        Some(noise_map)
     }
 
     // }

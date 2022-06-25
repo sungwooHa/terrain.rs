@@ -1,5 +1,6 @@
-use super::octave::Octave;
+use super::{octave::Octave, validatable::Validatable};
 
+#[derive(Clone)]
 pub struct Noise {
     pub octaves: Vec<Octave>,
     pub seed: u64,

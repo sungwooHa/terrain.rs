@@ -5,7 +5,7 @@ mod model;
 pub fn test_runner1() -> Option<Vec<Vec<f64>>> {
     const WIDTH: usize = 100;
     const HEIGHT: usize = 100;
-    const SCALE : f64 = (WIDTH + HEIGHT) as f64 * 0.1347;
+    const SCALE: f64 = (WIDTH + HEIGHT) as f64 * 0.1347;
 
     let mut octaves: Vec<Octave> = Vec::new();
     octaves.push(Octave::make_octave("terrain_1".to_string(), 0.25, 2f32));
@@ -20,5 +20,5 @@ pub fn test_runner1() -> Option<Vec<Vec<f64>>> {
 
     let terrain = Terrain::make_terrain(noise, WIDTH, HEIGHT, SCALE);
 
-    Some(terrain.generate_noise_map())
+    terrain.generate_noise_map()
 }
