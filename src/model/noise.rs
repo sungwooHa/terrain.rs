@@ -2,11 +2,11 @@ use super::octave::Octave;
 
 pub struct Noise {
     pub octaves: Vec<Octave>,
-    pub seed: u32,
+    pub seed: u64,
 }
 
 impl Noise {
-    pub fn make_noise(octaves: Vec<Octave>, seed: u32) -> Option<Noise> {
+    pub fn make_noise(octaves: Vec<Octave>, seed: u64) -> Option<Noise> {
         if octaves.is_empty() {
             None
         } else {
