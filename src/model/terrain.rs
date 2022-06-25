@@ -1,6 +1,6 @@
 use super::{
     noise::Noise,
-    validatable::{self, Validatable},
+    validatable::Validatable,
 };
 use noise::{NoiseFn, OpenSimplex, Seedable};
 use rand::{prelude::StdRng, Rng, SeedableRng};

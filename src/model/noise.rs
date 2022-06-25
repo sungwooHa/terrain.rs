@@ -1,4 +1,4 @@
-use super::{octave::Octave, validatable::Validatable};
+use super::octave::Octave;
 
 #[derive(Clone)]
 pub struct Noise {
@@ -12,8 +12,8 @@ impl Noise {
             None
         } else {
             Some(Noise {
-                octaves: octaves,
-                seed: seed,
+                octaves,
+                seed,
             })
         }
     }
