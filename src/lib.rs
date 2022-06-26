@@ -1,4 +1,4 @@
-use model::{noise::Noise, octave::Octave, terrain::Terrain};
+use model::{noise::Noise, terrain::Terrain};
 
 mod model;
 
