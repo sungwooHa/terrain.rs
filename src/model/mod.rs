@@ -1,4 +1,4 @@
 pub mod attributes;
-pub mod noise;
+pub mod noise_param;
 pub mod terrain;
-pub mod validatable;
+pub mod pixel;
