@@ -1,102 +1,97 @@
-use super::{noise_param::NoiseParam, pixel::Pixel};
-use noise::{NoiseFn, OpenSimplex, Seedable};
-use rand::{prelude::StdRng, Rng, SeedableRng};
+use std::collections::HashMap;
+
+use super::{layer::Layer, noise_param::NoiseParam, pixel::Pixel};
+
+#[derive(Clone, Debug, PartialEq, Eq, Hash)]
+enum LayerType {
+    Moisture,
+    Height,
+}
 
 #[derive(Clone)]
 pub struct Terrain {
-    noise_param: NoiseParam,
-    pub width: usize,
-    pub depth: usize,
-    pub scale: f64,
-
-    //about seed
-    octave_offsets : Vec<(f64, f64)>, //octave 한개 한개의 control은 보류한다.
-    perlin : OpenSimplex,
-
-
-    //Result
-    pub map : Vec<Vec<Pixel>>,
+    width: usize,
+    height: usize,
+    scale: f64,
+    hash_layer: HashMap<LayerType, Option<Layer>>,
+    map: Vec<Vec<Pixel>>,
 }
 
 impl Terrain {
-    pub fn make_terrain(noise_param: NoiseParam, width: usize, depth: usize, scale: f64) -> Terrain {
+    pub fn make_terrain(width: usize, height: usize, scale: f64) -> Terrain {
         Terrain {
-            noise_param : noise_param,
-            width :  width,
-            depth : depth,
-            scale : scale,
-            perlin : OpenSimplex::new(),
-            octave_offsets: Vec::new(),
-            map : Vec::new(),
+            width: width,
+            height: height,
+            scale: scale,
+            hash_layer: HashMap::from([(LayerType::Moisture, None), (LayerType::Height, None)]),
+            map: (0..width)
+                .map(|_| {
+                    (0..height)
+                        .map(|_| -> Pixel { Pixel::make_dummy() })
+                        .collect()
+                })
+                .collect(),
         }
     }
 
+    pub fn generate_height_layer(&mut self, noise_param: NoiseParam) {
+        if let Some(height_layer) = self.hash_layer.get_mut(&LayerType::Height) {
+            *height_layer = Some(Layer::make_layer(
+                noise_param,
+                self.width,
+                self.height,
+                self.scale,
+            ));
+        }
 
-    fn generate_perlin(&mut self){
-        self.perlin.set_seed(self.noise_param.seed as u32);
-    }
+        let height_map = self
+            .hash_layer
+            .get(&LayerType::Height)
+            .unwrap()
+            .as_ref()
+            .unwrap()
+            .get_map();
 
-    fn generate_octave(&mut self){
-        let mut rng: StdRng = StdRng::seed_from_u64(self.noise_param.seed as u64);
-        self.octave_offsets = (0..self.noise_param.num_octaves)
-        .map(|_| {
-            let x: f64 = rng.gen_range(-100000f64..100000f64);
-            let y: f64 = rng.gen_range(-100000f64..100000f64);
-            (x, y)
-        })
-        .collect();
-    }
-
-
-    fn generate_map(&mut self){
-        let mut noise_map: Vec<Vec<Pixel>> = (0..self.width)
-        .map(|_| (0..self.depth).map(|_| -> Pixel {Pixel::make_dummy()}).collect())
-        .collect();
-
-        self.generate_moisture_map();
-        self.generate_height_map();
-    }
-
-    fn generate_moisture_map(&mut self) {
-
-    }
-
-    fn generate_height_map(&mut self) {
-
-    }
-
-    pub fn generate_noise_map(&self) {
-        self.generate_perlin();
-        self.generate_octave();
-        self.generate_map();
-    }
-
-    pub fn generate_noise_map1(&self) -> Option<Vec<Vec<f64>>> {
-
-
-        for y in 0..self.depth {
+        for y in 0..self.height {
             for x in 0..self.width {
-                let mut amplitude = 1f64;
-                let mut frequency = 1f64;
-                let mut noise_height = 0f64;
+                self.map[x][y].height = height_map[x][y];
+            }
+        }
+    }
 
-                for idx_octave in 0..self.noise_param.num_octaves {
-                    let sample_x =
-                        (x as f64) / self.scale * frequency + self.octave_offsets[idx_octave].0;
-                    let sample_y =
-                        (y as f64) / self.scale * frequency + self.octave_offsets[idx_octave].1;
+    pub fn generate_moisture_layer(&mut self, noise_param: NoiseParam) {
+        if let Some(moisture_layer) = self.hash_layer.get_mut(&LayerType::Moisture) {
+            *moisture_layer = Some(Layer::make_layer(
+                noise_param,
+                self.width,
+                self.height,
+                self.scale,
+            ));
+        }
 
-                    let perlin_value = self.perlin.get([sample_x, sample_y]);
-                    noise_height += perlin_value * amplitude;
+        let moisture_map = self
+            .hash_layer
+            .get(&LayerType::Moisture)
+            .unwrap()
+            .as_ref()
+            .unwrap()
+            .get_map();
 
-                    amplitude *= self.noise_param.persistance as f64;
-                    frequency *= self.noise_param.lacunarity as f64;
-                }
-                noise_map[x][y] = noise_height;
+        for y in 0..self.height {
+            for x in 0..self.width {
+                self.map[x][y].moisture = moisture_map[x][y];
+            }
+        }
+    }
+
+    pub fn get_pixel_map(&self) -> Option<Vec<Vec<Pixel>>> {
+        for (_, layer_value) in &self.hash_layer {
+            if layer_value.is_none() {
+                return None;
             }
         }
 
-        Some(noise_map)
+        Some(self.map.clone())
     }
 
     // }

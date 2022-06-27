@@ -1,17 +1,16 @@
-
-#[derive(Clone)]
+#[derive(Debug, Clone)]
 pub struct Pixel {
-    height : f64,
-    moisture : f64,
-    habitance : bool,
+    pub height: f64,
+    pub moisture: f64,
+    pub habitance: bool,
 }
 
 impl Pixel {
     pub fn make_dummy() -> Pixel {
         Pixel {
-             height: 0f64, 
-             moisture: 0f64, 
-             habitance: false, 
-            }
+            height: 0f64,
+            moisture: 0f64,
+            habitance: false,
+        }
     }
 }

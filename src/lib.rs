@@ -1,18 +1,24 @@
 use model::attributes::{traits::*, *};
-use model::{noise::Noise, terrain::Terrain};
+use model::noise_param::NoiseParam;
+use model::pixel::Pixel;
+use model::terrain::Terrain;
 
 mod model;
 
-pub fn test_runner1() -> Option<Vec<Vec<f64>>> {
+pub fn test_runner1() -> Option<Vec<Vec<Pixel>>> {
     const WIDTH: usize = 100;
     const HEIGHT: usize = 100;
     const SCALE: f64 = (WIDTH + HEIGHT) as f64 * 0.1347;
 
-    let noise = Noise::make_noise(0.25, 2f32, 3, 2400);
+    let mut terrain = Terrain::make_terrain(WIDTH, HEIGHT, SCALE);
 
-    let terrain = Terrain::make_terrain(noise, WIDTH, HEIGHT, SCALE);
+    let noise_height_layer = NoiseParam::make_noise(0.5, 2f32, 3, 2400);
+    let noise_moisture_layer = NoiseParam::make_noise(0.25, 2f32, 3, 2400);
 
-    terrain.generate_noise_map()
+    terrain.generate_height_layer(noise_height_layer);
+    terrain.generate_moisture_layer(noise_moisture_layer);
+
+    terrain.get_pixel_map()
 }
 
 pub fn generate_habitality_map() -> Option<Vec<Vec<Habitability>>> {
@@ -22,7 +28,7 @@ pub fn generate_habitality_map() -> Option<Vec<Vec<Habitability>>> {
             map.iter()
                 .map(|row| {
                     row.iter()
-                        .map(|&col| Habitability::interpolate(col))
+                        .map(|pixel| Habitability::interpolate(pixel.height))
                         .collect()
                 })
                 .collect(),
@@ -39,7 +45,11 @@ pub fn generate_height_map() -> Option<Vec<Vec<Height>>> {
     if let Some(map) = map {
         Some(
             map.iter()
-                .map(|row| row.iter().map(|&col| height_interpolater(col)).collect())
+                .map(|row| {
+                    row.iter()
+                        .map(|pixel| height_interpolater(pixel.height))
+                        .collect()
+                })
                 .collect(),
         )
     } else {
